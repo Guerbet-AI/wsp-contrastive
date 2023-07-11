@@ -6,7 +6,7 @@
 
 Official implementation of "Weakly-supervised positional contrastive learning: application to cirrhosis classification", accepted paper at MICCAI 2023.  
 
-**Authors**: *Emma Sarfati $^{*[1,2]}$, Alexandre Bône $^{[1]}$, Marc-Michel Rohé $^{[1]}$, Pietro Gori $^{[2]}$, Isabelle Bloch $^{[2,3]}$*.  
+**Authors**: *Emma Sarfati* $^{*[1,2]}$, *Alexandre Bône* $^{[1]}$, *Marc-Michel Rohé* $^{[1]}$, *Pietro Gori* $^{[2]}$, *Isabelle Bloch* $^{[2,3]}$.  
 
 [1] Guerbet Research, Villepinte, France  
 [2] LTCI, Télécom Paris, Institut Polytechnique de Paris, France  
