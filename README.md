@@ -15,4 +15,11 @@ $*$ Corresponding author
 
 
 This paper introduces a new contrastive learning method based on a generic kernel-loss function that allows to leverage discrete and continuous meta-labels for medical imaging.  
+
+$$s_{tj}^- - s_{ti}^+ \leq 0 \quad \forall t,j,i$$
+where $s_{tj}^-=sim(f_\theta(x_t),f_\theta(x_j^-))
+$ and $s_{ti}^+=sim(f_\theta(x_t),f_\theta(x_i^+))
+$, with $sim$ a similarity function defined here as $sim(a,b)=\frac{a^Tb}{\tau}$ with $\tau>0$.
+
+
 Codes are currently being updated, stay tuned!
