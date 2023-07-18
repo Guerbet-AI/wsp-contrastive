@@ -49,10 +49,14 @@ Please note that the normalized positional coordinate $d\in [0,1]$ (named `z` in
 
 # Pretraining
 
-```main.py --mode pretraining``` 
+```
+main.py --mode pretraining
+```
 
 # Finetuning
 
-```main.py --mode fintuning``` 
+```
+main.py --mode finetuning
+``` 
 
 For adding an argument, you can add `--name_arg arg`, the list of arguments being available in the config file.
