@@ -7,64 +7,6 @@ from sklearn.metrics.pairwise import rbf_kernel, euclidean_distances, cosine_sim
 import numpy as np
 
 
-def apply_weighting(x):
-    if x == 0: return 1
-    elif x == 1: return 0.5
-    else: return 0
-
-vec_weights = np.vectorize(apply_weighting, otypes=[float])
-
-def apply_weighting(x):
-    return np.exp(-x)
-
-vec = np.vectorize(apply_weighting, otypes=[float])
-
-class SupConLoss(nn.Module):
-    def __init__(self, config, temperature=0.1, return_logits=False):
-        """
-        Supervised Contrastive Learning loss. For more details, refer to
-        Prannay Khosla, Piotr Teterwak, Chen Wang et al.
-        Supervised Contrastive Learning, NeurIPS 2020.
-        :param config: configuration file containing the main info for training
-        :param temperature: 'tau' parameter specific to InfoNCE loss
-        :param return_logits: boolean parameter if return the correct pairs in the similarity matrix.
-        :return: a PyTorch Module.
-        """
-
-        super().__init__()
-        self.temperature = temperature
-        self.config = config
-        self.return_logits = return_logits
-
-    def forward(self, z_i, z_j, labels):
-        N = len(z_i)
-        id_mat = torch.eye(2*N, device=z_i.device)
-        z_i = func.normalize(z_i, p=2, dim=-1)  # dim [N, D]
-        z_j = func.normalize(z_j, p=2, dim=-1)  # dim [N, D]
-        z = torch.cat([z_i,z_j], dim=0)         # dim [2N, D]
-        sim_mat = (z @ z.T) / self.temperature  # shape [2N, 2N]
-        sim_mat = ( sim_mat * ( 1 - id_mat ) ) - id_mat * 1e8  # similarity matrix: the diag has to be removed
-        labs = func.one_hot(torch.tensor(labels, device=z_i.device).long(),num_classes=self.config.num_classes)
-        L = torch.cat([labs,labs], dim=0).to(torch.float32)       # shape [2N, 2]: one-hot encoded vector of labels, repeated twice
-        mask = L @ L.T                          # shape [2N, 2N]: mask where mask(i,j) = 1 if z_i(i) has same label as z_j(j) and 0 otherwise
-        mask = mask * (1 - id_mat)
-        card_P_i = mask.sum(dim=1)
-
-        log_sim = func.log_softmax(sim_mat,dim=1)
-        positive_mat = (log_sim * mask) / card_P_i
-        loss = -positive_mat.sum() / (2*N)
-
-        correct_pairs = torch.arange(N, device=z_i.device).long()
-        sim_zij = sim_mat[:N,N:]                # the upper right matrix contains z_i @ z_j.T
-
-        if self.return_logits:
-            return loss, sim_zij, correct_pairs
-
-        return loss
-
-
-
-
 class WSPContrastiveLoss(nn.Module):
     def __init__(self, config, kernel='rbf', temperature=0.1, return_logits=False, sigma=1.0):
         """
@@ -141,6 +83,50 @@ class WSPContrastiveLoss(nn.Module):
 
         return loss
 
+
+
+class SupConLoss(nn.Module):
+    def __init__(self, config, temperature=0.1, return_logits=False):
+        """
+        Supervised Contrastive Learning loss. For more details, refer to
+        Prannay Khosla, Piotr Teterwak, Chen Wang et al.
+        Supervised Contrastive Learning, NeurIPS 2020.
+        :param config: configuration file containing the main info for training
+        :param temperature: 'tau' parameter specific to InfoNCE loss
+        :param return_logits: boolean parameter if return the correct pairs in the similarity matrix.
+        :return: a PyTorch Module.
+        """
+
+        super().__init__()
+        self.temperature = temperature
+        self.config = config
+        self.return_logits = return_logits
+
+    def forward(self, z_i, z_j, labels):
+        N = len(z_i)
+        id_mat = torch.eye(2*N, device=z_i.device)
+        z_i = func.normalize(z_i, p=2, dim=-1)  # dim [N, D]
+        z_j = func.normalize(z_j, p=2, dim=-1)  # dim [N, D]
+        z = torch.cat([z_i,z_j], dim=0)         # dim [2N, D]
+        sim_mat = (z @ z.T) / self.temperature  # shape [2N, 2N]
+        sim_mat = ( sim_mat * ( 1 - id_mat ) ) - id_mat * 1e8  # similarity matrix: the diag has to be removed
+        labs = func.one_hot(torch.tensor(labels, device=z_i.device).long(),num_classes=self.config.num_classes)
+        L = torch.cat([labs,labs], dim=0).to(torch.float32)       # shape [2N, 2]: one-hot encoded vector of labels, repeated twice
+        mask = L @ L.T                          # shape [2N, 2N]: mask where mask(i,j) = 1 if z_i(i) has same label as z_j(j) and 0 otherwise
+        mask = mask * (1 - id_mat)
+        card_P_i = mask.sum(dim=1)
+
+        log_sim = func.log_softmax(sim_mat,dim=1)
+        positive_mat = (log_sim * mask) / card_P_i
+        loss = -positive_mat.sum() / (2*N)
+
+        correct_pairs = torch.arange(N, device=z_i.device).long()
+        sim_zij = sim_mat[:N,N:]                # the upper right matrix contains z_i @ z_j.T
+
+        if self.return_logits:
+            return loss, sim_zij, correct_pairs
+
+        return loss
 
 
 
