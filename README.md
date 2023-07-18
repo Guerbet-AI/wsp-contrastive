@@ -46,3 +46,13 @@ The data that are fed to the models are, in this order: `data, label, subject_id
 - `subject_id`: name of the subject, for convenience.
 - `z`: continuous label corresponding to the variable $d$ in Eq. (1).
 Please note that the normalized positional coordinate $d\in [0,1]$ (named `z` in the code) is computed automatically given each volume at the beginning of the `dataset.py` file. Hence you will only have to provide the discrete label in the dataframe. If you wish to use other labels related to the patients you can do it by providing other columns in the original dataframe. You will need to change the implementation of the loss accordingly by adding discrete/continuous kernels.
+
+# Pretraining
+
+```main.py --mode pretraining``` 
+
+# Finetuning
+
+```main.py --mode fintuning``` 
+
+For adding an argument, you can add `--name_arg arg`, the list of arguments being available in the config file.
