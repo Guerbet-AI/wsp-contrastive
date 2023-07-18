@@ -23,7 +23,7 @@ In contrastive learning (CL), one wants to find a parametric function $f_{\theta
 $$s_{tj}^- - s_{ti}^+ \leq 0 \quad \forall t,j,i$$
 where $s_{tj}^-=sim(f_\theta(x_t),f_\theta(x_j^-))$ and $s_{ti}^+=sim(f_\theta(x_t),f_\theta(x_i^+))$, with $sim$ a similarity function defined here as $sim(a,b)=\frac{a^Tb}{\tau}$ with $\tau>0$.  
 In practice, one does not know the definition of negative and positive. This is the main difference between each CL method. In SimCLR [1], positives are two random augmentations of the anchor $x_t$ and negatives are the other images. In SupCon [2], positives are all the images with the same discrete label $y$. In [3], all samples are considered positives but have a continuous degree of positiveness according to the associated continuous variables $d$ provided by a Gaussian kernel. In this work, we propose to leverage at the same time a discrete variable $y$ as well as a continuous one $y$ by introducing a composite kernel such that:
-$$w_\delta(y_t,y_i) \cdot w_\sigma(d_t,d_i) (s_{tj}-s_{ti}) \leq 0 \quad \forall t,i,j\neq i      (1)$$
+$$w_\delta(y_t,y_i) \cdot w_\sigma(d_t,d_i) (s_{tj}-s_{ti}) \leq 0 \quad \forall t,i,j\neq i \quad (1)$$
 
 where the indices $t,i,j$ traverse all $N$ images in the batch since there are no ``hard'' positive or negative samples, as in SimCLR or SupCon, but all images are considered as positive and negative at the same time. After simplification, our final loss function leads to:  
 $$\mathcal{L_{WSP}}=-\sum_{t=1}^{N} \sum_{i\in P(t)} w_\sigma(d_t,d_i) \log \left( \frac{\exp(s_{ti})}{ \sum_{j\neq i} \exp(s_{tj})} \right)$$
@@ -44,5 +44,5 @@ The data that are fed to the models are, in this order: `data, label, subject_id
 - `data`: 2D image of shape (1,512,512).
 - `label`: discrete label corresponding to the variable $y$ in Eq. (1).
 - `subject_id`: name of the subject, for convenience.
-- `z`: continuous label corresponding to the $d$ in Eq. (1).
-- $d$: continuous positional variable which is computed beforehand in the `dataset.py` file.
+- `z`: continuous label corresponding to the variable $d$ in Eq. (1).
+Please note that the normalized positional coordinate $d\in [0,1]$ (named `z` in the code) is computed automatically given each volume at the beginning of the `dataset.py` file. Hence you will only have to provide the discrete label in the dataframe. If you wish to use other labels related to the patients you can do it by providing other columns in the original dataframe. You will need to change the implementation of the loss accordingly by adding discrete/continuous kernels.
