@@ -33,12 +33,25 @@ References:
 [2] [SupCon](https://arxiv.org/abs/2004.11362)  
 [3] [y-Aware](https://arxiv.org/abs/2106.08808)  
 
-**Codes**
+# Codes
 
-This repo contains the official codes for WSP Contrastive Learning. The codes are implemented using PyTorch-Lightning. In this code you have to provide a dataframe with:
+This repo contains the official codes for WSP Contrastive Learning. The codes are implemented using PyTorch-Lightning. 
+
+## Requirements
+
+### Image data
+
+All the images must be stored in the `path_to_data` path and must contain two folders inside:
+- `/train`: training images in Nifty format.
+- `/validation`: validation images in Nifty format.
+
+### DataFrame 
+
+To run properly the codes, you will have to provide a Pandas DataFrame with the following index and columns:
 - Index: name of the subjects.
 - Column `class`: radiological class or histological class depending on the type of task (pretraining or classification).
 - Column `label`: histological class (if available).
+We provide the dataframe for the public LIHC dataset that we used in our paper, in the `dataframe_lihc.csv`file. The nifty files are available at this website: PUT A FILE TO THE SCANS HERE
 
 The data that are fed to the models are, in this order: `data, label, subject_id, z`.
 - `data`: 2D image of shape (1,512,512).
