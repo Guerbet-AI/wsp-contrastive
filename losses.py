@@ -7,8 +7,62 @@ from sklearn.metrics.pairwise import rbf_kernel, euclidean_distances, cosine_sim
 import numpy as np
 
 
+class SupConLoss(nn.Module):
+    def __init__(self,
+                 config,
+                 temperature: float = 0.1,
+                 return_logits: bool = False):
+        """
+        Supervised Contrastive Learning loss. For more details, refer to
+        Prannay Khosla, Piotr Teterwak, Chen Wang et al.
+        Supervised Contrastive Learning, NeurIPS 2020.
+        :param config: configuration file containing the main info for training
+        :param temperature: 'tau' parameter specific to InfoNCE loss
+        :param return_logits: boolean parameter if return the correct pairs in the similarity matrix.
+        :return: a PyTorch Module.
+        """
+
+        super().__init__()
+        self.temperature = temperature
+        self.config = config
+        self.return_logits = return_logits
+
+    def forward(self, z_i, z_j, labels):
+        N = len(z_i)
+        id_mat = torch.eye(2*N, device=z_i.device)
+        z_i = func.normalize(z_i, p=2, dim=-1)  # dim [N, D]
+        z_j = func.normalize(z_j, p=2, dim=-1)  # dim [N, D]
+        z = torch.cat([z_i,z_j], dim=0)         # dim [2N, D]
+        sim_mat = (z @ z.T) / self.temperature  # shape [2N, 2N]
+        sim_mat = ( sim_mat * ( 1 - id_mat ) ) - id_mat * 1e8  # similarity matrix: the diag has to be removed
+        labs = func.one_hot(torch.tensor(labels, device=z_i.device).long(),num_classes=self.config.num_classes)
+        L = torch.cat([labs,labs], dim=0).to(torch.float32)       # shape [2N, 2]: one-hot encoded vector of labels, repeated twice
+        mask = L @ L.T                          # shape [2N, 2N]: mask where mask(i,j) = 1 if z_i(i) has same label as z_j(j) and 0 otherwise
+        mask = mask * (1 - id_mat)
+        card_P_i = mask.sum(dim=1)
+
+        log_sim = func.log_softmax(sim_mat,dim=1)
+        positive_mat = (log_sim * mask) / card_P_i
+        loss = -positive_mat.sum() / (2*N)
+
+        correct_pairs = torch.arange(N, device=z_i.device).long()
+        sim_zij = sim_mat[:N,N:]                # the upper right matrix contains z_i @ z_j.T
+
+        if self.return_logits:
+            return loss, sim_zij, correct_pairs
+
+        return loss
+
+
+
+
 class WSPContrastiveLoss(nn.Module):
-    def __init__(self, config, kernel='rbf', temperature=0.1, return_logits=False, sigma=1.0):
+    def __init__(self,
+                 config,
+                 kernel: str = 'rbf',
+                 temperature: float = 0.1,
+                 return_logits: float = False,
+                 sigma: float = 1.0):
         """
         The proposed WSP contrastive loss. For more details, refer to:
         Emma Sarfati, Alexandre Bône, Marc-Michel Rohé, Pietro Gori, Isabelle Bloch
@@ -85,55 +139,11 @@ class WSPContrastiveLoss(nn.Module):
 
 
 
-class SupConLoss(nn.Module):
-    def __init__(self, config, temperature=0.1, return_logits=False):
-        """
-        Supervised Contrastive Learning loss. For more details, refer to
-        Prannay Khosla, Piotr Teterwak, Chen Wang et al.
-        Supervised Contrastive Learning, NeurIPS 2020.
-        :param config: configuration file containing the main info for training
-        :param temperature: 'tau' parameter specific to InfoNCE loss
-        :param return_logits: boolean parameter if return the correct pairs in the similarity matrix.
-        :return: a PyTorch Module.
-        """
-
-        super().__init__()
-        self.temperature = temperature
-        self.config = config
-        self.return_logits = return_logits
-
-    def forward(self, z_i, z_j, labels):
-        N = len(z_i)
-        id_mat = torch.eye(2*N, device=z_i.device)
-        z_i = func.normalize(z_i, p=2, dim=-1)  # dim [N, D]
-        z_j = func.normalize(z_j, p=2, dim=-1)  # dim [N, D]
-        z = torch.cat([z_i,z_j], dim=0)         # dim [2N, D]
-        sim_mat = (z @ z.T) / self.temperature  # shape [2N, 2N]
-        sim_mat = ( sim_mat * ( 1 - id_mat ) ) - id_mat * 1e8  # similarity matrix: the diag has to be removed
-        labs = func.one_hot(torch.tensor(labels, device=z_i.device).long(),num_classes=self.config.num_classes)
-        L = torch.cat([labs,labs], dim=0).to(torch.float32)       # shape [2N, 2]: one-hot encoded vector of labels, repeated twice
-        mask = L @ L.T                          # shape [2N, 2N]: mask where mask(i,j) = 1 if z_i(i) has same label as z_j(j) and 0 otherwise
-        mask = mask * (1 - id_mat)
-        card_P_i = mask.sum(dim=1)
-
-        log_sim = func.log_softmax(sim_mat,dim=1)
-        positive_mat = (log_sim * mask) / card_P_i
-        loss = -positive_mat.sum() / (2*N)
-
-        correct_pairs = torch.arange(N, device=z_i.device).long()
-        sim_zij = sim_mat[:N,N:]                # the upper right matrix contains z_i @ z_j.T
-
-        if self.return_logits:
-            return loss, sim_zij, correct_pairs
-
-        return loss
-
-
 
 class NTXenLoss(nn.Module):
     """
-    Normalized Temperature Cross-Entropy Loss for Constrastive Learning
-    Refer for instance to:
+    Normalized Temperature Cross-Entropy Loss for Constrastive Learning.
+    For more details, refer to:
     Ting Chen, Simon Kornblith, Mohammad Norouzi, Geoffrey Hinton
     A Simple Framework for Contrastive Learning of Visual Representations, ICML 2020.
     :param temperature: the 'tau' parameter referred in the paper.
@@ -141,7 +151,9 @@ class NTXenLoss(nn.Module):
     :return: PyTorch module.
     """
 
-    def __init__(self, temperature=0.1, return_logits=False):
+    def __init__(self,
+                 temperature: float = 0.1,
+                 return_logits: bool = False):
         super().__init__()
         self.temperature = temperature
         self.INF = 1e8
@@ -149,8 +161,6 @@ class NTXenLoss(nn.Module):
 
     def forward(self, z_i, z_j):
         N = len(z_i)
-        #print(z_i[0])
-        #print(z_j[0])
         z_i = func.normalize(z_i, p=2, dim=-1) # dim [N, D]
         z_j = func.normalize(z_j, p=2, dim=-1) # dim [N, D]
         sim_zii = (z_i @ z_i.T) / self.temperature # dim [N, N] => Upper triangle contains incorrect pairs

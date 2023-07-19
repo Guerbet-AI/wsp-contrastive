@@ -1,26 +1,17 @@
 import sklearn.metrics
 import torch
 from torch.optim.lr_scheduler import ExponentialLR
-from collections import OrderedDict
-# from sam import SAM
+
 import pytorch_lightning as pl
 from torch.autograd import Variable
 from torch.nn.functional import softmax
-import matplotlib.pyplot as plt
-from matplotlib.colors import ListedColormap
 from torch.utils.data import DataLoader, RandomSampler, WeightedRandomSampler, SequentialSampler, Subset
 from dataset import Dataset
 from sklearn.decomposition import PCA
 import time
 import cv2
-from mpl_toolkits.mplot3d import Axes3D
-from sklearn.manifold import Isomap
-from sklearn.manifold import TSNE
-from sklearn.preprocessing import StandardScaler
-from ignite.contrib.metrics import ROC_AUC
 from sklearn.metrics import confusion_matrix, roc_auc_score, accuracy_score, balanced_accuracy_score, roc_curve, auc
 import numpy as np
-import psutil
 from dataset import DatasetCL
 import seaborn as sns
 import pandas as pd
@@ -30,13 +21,11 @@ from os import listdir
 from collections import Counter
 from torch import Tensor
 import models.network as model
-import random
-from sklearn import svm
 import kornia
-from kornia import image_to_tensor, tensor_to_image
 
 
 class DataAugmentation(torch.nn.Module):
+
     """Module to perform data augmentation using Kornia on torch tensors.
     :return: a torch tensor with Kornia GPU augmentation module."""
 
@@ -44,17 +33,17 @@ class DataAugmentation(torch.nn.Module):
         super().__init__()
 
         self.transforms = torch.nn.Sequential(
-            #kornia.augmentation.RandomGaussianNoise(p=0.5, mean=0.0, std=0.1),          # to comment
+            #kornia.augmentation.RandomGaussianNoise(p=0.5, mean=0.0, std=0.1),
             #kornia.augmentation.RandomGaussianBlur(p=0.5, kernel_size=(3, 3), sigma=(0.1, 2)),
             kornia.augmentation.RandomHorizontalFlip(p=0.5),
             kornia.augmentation.RandomVerticalFlip(p=0.5),
-            #kornia.augmentation.RandomErasing(p=0.5, scale=(0.05, 0.05), ratio=(1, 1)),   # to comment
+            #kornia.augmentation.RandomErasing(p=0.5, scale=(0.05, 0.05), ratio=(1, 1)),
             kornia.augmentation.RandomResizedCrop(p=0.5, size=(512, 512), scale=(0.7, 0.7)),
             kornia.augmentation.RandomAffine(p=0.5, degrees=0, translate=(0.2, 0.2)),
             kornia.augmentation.RandomRotation(p=0.5, degrees=30)
         )
 
-    @torch.no_grad()  # disable gradients for efficiency
+    @torch.no_grad()                # disable gradients for efficiency
     def forward(self, x: Tensor) -> Tensor:
         x_out = self.transforms(x)  # BxCxHxW
         return x_out
@@ -73,7 +62,8 @@ class wspContrastiveModel(pl.LightningModule):
         Keywords arguments:
         :param net: type of network used for training
         :param loss: loss used for training
-        :param loader_train, loader_val: pytorch DataLoaders for training/validation
+        :param loader_train: PyTorch DataLoader for training
+        :param loader_val: PyTorch DataLoader for validation
         :param config: Config object with hyperparameters
         :return: a pl module
         """
@@ -97,25 +87,24 @@ class wspContrastiveModel(pl.LightningModule):
         if self.config.mode == 'finetuning':
 
             # TRAINING PART
-            index_train = self.data_train.labels.index                                # liste des volumes dans toute la base d'entraînement
+            index_train = self.data_train.labels.index                                # list of the training volumes
             self.df_train = pd.DataFrame({'epoch_'+str(i): [np.zeros(self.config.num_classes) for x in index_train] for i in range(500)},
                                          index=index_train)
-                                                                                      # df_train: contient la moyenne des probas par patient sur toute l'epoch (moyenne par step)
-            dic_train = dict(Counter(self.data_train.volumes))                        # a dictionary that maps the volumes to their occurrences inside the validation dataset
-            self.df_train['nb_slices'] = [dic_train[x] for x in self.df_train.index]  # nombre de slices associé à chaque volume dans la base de données
-            self.df_train['class'] = self.data_train.labels['class']
-            self.df_train['label'] = self.data_train.labels['label']                  # label associé à chaque volume dans la base de données
+                                                                                      # df_train: contains the avg of the probabilities by patient over the whole epoch
+            dic_train = dict(Counter(self.data_train.volumes))                        # a dictionary that maps the volumes to their occurrences inside the training dataset
+            self.df_train['nb_slices'] = [dic_train[x] for x in self.df_train.index]  # nb of slices associated to each volume in the training dataset
+            self.df_train['class'] = self.data_train.labels['class']                  # class associated to each volume in the training dataset
+            self.df_train['label'] = self.data_train.labels['label']                  # label (binarized class) associated to each volume in the training dataset
 
             # VALIDATION PART
             index_val = self.data_val.labels.index
             self.df_val = pd.DataFrame({'epoch_'+str(i): [np.zeros(self.config.num_classes) for x in index_val] for i in range(500)},
                                        index=index_val)
-                                                                                      # df_train: contient la moyenne des probas par patient sur toute l'epoch (moyenne par step)
+
             dic_val = dict(Counter(self.data_val.volumes))                            # a dictionary that maps the volumes to their occurrences inside the validation dataset
-            self.df_val['nb_slices'] = [dic_val[x] for x in self.df_val.index]
-            self.df_val['class'] = self.data_val.labels['class']
-            if self.config.num_classes == 2:
-                self.df_val['label'] = self.data_val.labels['label']  # label associé à chaque volume dans la base de données
+            self.df_val['nb_slices'] = [dic_val[x] for x in self.df_val.index]        # nb of slices associated to each volume in the validation dataset
+            self.df_val['class'] = self.data_val.labels['class']                      # class associated to each volume in the validation dataset
+            self.df_val['label'] = self.data_val.labels['label']                      # label (binarized class) associated to each volume in the validation dataset
 
 
         if hasattr(config, 'pretrained_path') and config.pretrained_path is not None:
@@ -168,12 +157,12 @@ class wspContrastiveModel(pl.LightningModule):
 
         elif self.mode == "finetuning":
 
-            aug = self.transforms(inputs / 250.)                        # inputs shape: (batch_size,1,512,512)
+            aug = self.transforms(inputs / 250.)                # inputs shape: (batch_size,1,512,512)
 
             ## Forward pass
-            y = self(aug)  # y shape (batch_size,C)
+            y = self(aug)                                       # y shape (batch_size,C)
             ## Compute the Loss
-            loss = self.loss(y, labels)  # loss : cross-entropy loss
+            loss = self.loss(y, labels)                         # loss : cross-entropy loss
 
             ## Output probabilities of class 1 on the batch
             y_prob = softmax(y, dim=1).detach().cpu().numpy()   # shape (batch_size,C)

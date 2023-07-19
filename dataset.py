@@ -17,11 +17,10 @@ import itertools
 from operator import itemgetter
 from collections import Counter
 import matplotlib.pyplot as plt
-from natsort import natsorted
 
 class DatasetCL(Dataset):  # output size : (N,(512,512,2),1,1)
 
-    def __init__(self, config, training=False, validation=False, *args, **kwargs):
+    def __init__(self, config, training: bool = False, validation: bool = False, *args, **kwargs):
 
         """PyTorch Dataset Module for training and validation
         Keywords arguments:
@@ -90,20 +89,21 @@ class DatasetCL(Dataset):  # output size : (N,(512,512,2),1,1)
         print('Class repartition',self.class_sample_count)
 
 
-    def load_img(self, k, pct=0.7):
+    def load_img(self, k: str = None, pct: float = 0.7):
+
         """Function to load an image given a Nifty file and a percentage of volume to keep around the center
         Keywords arguments:
         :k: path to a Nifty file
         :pct: float between 0 and 1 representing the percentage around the center of the volume to keep
         :return: a NumPy array with the selected slices"""
+
         mat = np.asanyarray(nib.load(join(self.path, k)).dataobj)
         length = mat.shape[-1]
         u = range(int((length * (1-pct)) // 2), int(length * pct + int((length * (1-pct)) // 2 ) ) )
         return mat[:,:,u]
 
 
-    def collate_fn(self,
-                   list_samples):  # c'est juste une fonction pour loader le batch manuellement (non obligatoire)
+    def collate_fn(self, list_samples: list = None):
 
         list_x = torch.stack(
             [torch.as_tensor(x.astype('uint8').copy(), dtype=torch.float) for (x, y, z, m) in list_samples], dim=0)     # dimension finale: (batch_size, 1, 512, 512)
@@ -117,7 +117,8 @@ class DatasetCL(Dataset):  # output size : (N,(512,512,2),1,1)
 
         return list_x, list_y, list_z, list_m
 
-    def __getitem__(self, idx):
+
+    def __getitem__(self, idx: int = None):
 
         data = self.slices[:, :, idx]       # shape(H,W)
         data = np.squeeze(data)[np.newaxis] # shape (1,H,W)

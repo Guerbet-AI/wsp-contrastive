@@ -7,7 +7,7 @@ from losses import WSPContrastiveLoss
 from torch.nn import CrossEntropyLoss
 import itertools
 import models.network as model_
-from sampler import CustomSampler, CustomSamplerTrain, CustomSamplerVal
+from sampler import CustomSampler
 import argparse
 from pytorch_lightning.loggers.tensorboard import TensorBoardLogger
 from config import Config
@@ -16,8 +16,6 @@ from sklearn.model_selection import KFold, StratifiedKFold, LeaveOneOut, train_t
 import pytorch_lightning as pl
 import pandas as pd
 from pytorch_lightning.callbacks import ModelCheckpoint, Callback
-from pytorch_lightning.callbacks.early_stopping import EarlyStopping
-from pytorch_lightning.trainer.states import RunningStage
 from os.path import join
 from sklearn.metrics import confusion_matrix
 import numpy as np

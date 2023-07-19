@@ -68,9 +68,9 @@ class Config:
         self.encoder = encoder
         self.pretrained = pretrained
         self.n_layer = n_layer
-        self.rep_dim = rep_dim              # representation space for downstream tasks
-        self.hidden_dim = hidden_dim        # space between the representation space and the "loss space"
-        self.output_dim = output_dim        # space where the loss is computed
+        self.rep_dim = rep_dim
+        self.hidden_dim = hidden_dim
+        self.output_dim = output_dim
         self.num_classes = num_classes
         # Cross-validation parameters
         self.cross_val = cross_val
@@ -101,6 +101,6 @@ class Config:
 
         elif self.mode == "finetuning":
 
-            # Tensorboard and saving csv
+            # Saving csv files
             self.df_train_name = 'finetuning_train.csv'
             self.df_val_name = 'finetuning_val.csv'
