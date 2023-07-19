@@ -16,7 +16,7 @@ $*$ Corresponding author
 
 This paper introduces a new contrastive learning method based on a generic kernel-loss function that allows to leverage discrete and continuous meta-labels for medical imaging.  
 
-**Context**
+# Method
 
 Let $x_t$ be a random image in our dataset $\mathcal{X}$, called an anchor, and $(y_t,d_t)$ be a pair of respectively discrete and continuous random variables associated to $x_t$. Let $x_j^-$ and $x_i^+$ be two semantically different and similar images respectively, w.r.t $x_t$.  
 In contrastive learning (CL), one wants to find a parametric function $f_{\theta}:\mathcal{X}\rightarrow \mathrm{S}^d$ such that:
@@ -63,27 +63,29 @@ python main.py --mode <put mode here> --rep_dim <put number here> --num_classes 
 
 And so on. All the arguments are available in the file `config.py` and are provided below.
 
-``mode: str = 'finetuning',
-                 rep_dim: int = 512,
-                 hidden_dim: int = 256,
-                 output_dim: int = 128,
-                 num_classes: int = 4,
-                 encoder: str = 'tiny',
-                 n_layer: int = 18,
-                 lr: float = 1e-5,
-                 weight_decay: float = 1e-5,
-                 label_name: str = 'label',
-                 n_fold: int = 4,
-                 cross_val: bool = False,
-                 pretrained_path: str = None,
-                 sigma: float = 0.85,
-                 temperature: float = 0.1,
-                 kernel: str = 'rbf',
-                 max_epochs: int = 40,
-                 batch_size: int = 64,
-                 pretrained: bool = False,
-                 path_to_data: str = "path_to_data",
-                 lght_dir: str = "path_to_models"``
+```
+mode: str = 'finetuning',  
+                 rep_dim: int = 512,  
+                 hidden_dim: int = 256,  
+                 output_dim: int = 128,  
+                 num_classes: int = 4,  
+                 encoder: str = 'tiny',  
+                 n_layer: int = 18,  
+                 lr: float = 1e-5,  
+                 weight_decay: float = 1e-5,  
+                 label_name: str = 'label',  
+                 n_fold: int = 4,  
+                 cross_val: bool = False,  
+                 pretrained_path: str = None,  
+                 sigma: float = 0.85,  
+                 temperature: float = 0.1,  
+                 kernel: str = 'rbf',  
+                 max_epochs: int = 40,  
+                 batch_size: int = 64,  
+                 pretrained: bool = False,  
+                 path_to_data: str = "path_to_data",  
+                 lght_dir: str = "path_to_models"  
+```
 
 For either pretraining or finetuning mode, the data that are fed to the models are, in this order: `data, label, subject_id, z`.
 - `data`: 2D image of shape (1,512,512).
