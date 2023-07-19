@@ -24,6 +24,7 @@ import models.network as model
 import kornia
 
 
+
 class DataAugmentation(torch.nn.Module):
 
     """Module to perform data augmentation using Kornia on torch tensors.
@@ -53,6 +54,8 @@ def cutoff_youdens_j(fpr,tpr,thresholds):
     j_scores = tpr-fpr
     j_ordered = sorted(zip(j_scores,thresholds))
     return j_ordered[-1][1]
+
+
 
 class wspContrastiveModel(pl.LightningModule):
 
