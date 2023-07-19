@@ -51,25 +51,67 @@ To run properly the codes, you will have to provide a Pandas DataFrame with the 
 - Index: name of the subjects.
 - Column `class`: radiological class or histological class depending on the type of task (pretraining or classification).
 - Column `label`: histological class (if available).
-We provide the dataframe for the public LIHC dataset that we used in our paper, in the `dataframe_lihc.csv`file. The nifty files are available at this website: PUT A FILE TO THE SCANS HERE
+We provide the dataframe for the public LIHC dataset that we used in our paper, in the `dataframe_lihc.csv`file. 
 
-The data that are fed to the models are, in this order: `data, label, subject_id, z`.
+## Launching the codes 
+
+The file `main.py`can be launched in two different modes: pretraining or finetuning. Many other arguments follow, that you will have to indicate by following this convention:
+
+```
+python main.py --mode <put mode here> --rep_dim <put number here> --num_classes <put number here>
+```
+
+And so on. All the arguments are available in the file `config.py` and are provided below.
+
+``mode: str = 'finetuning',
+                 rep_dim: int = 512,
+                 hidden_dim: int = 256,
+                 output_dim: int = 128,
+                 num_classes: int = 4,
+                 encoder: str = 'tiny',
+                 n_layer: int = 18,
+                 lr: float = 1e-5,
+                 weight_decay: float = 1e-5,
+                 label_name: str = 'label',
+                 n_fold: int = 4,
+                 cross_val: bool = False,
+                 pretrained_path: str = None,
+                 sigma: float = 0.85,
+                 temperature: float = 0.1,
+                 kernel: str = 'rbf',
+                 max_epochs: int = 40,
+                 batch_size: int = 64,
+                 pretrained: bool = False,
+                 path_to_data: str = "path_to_data",
+                 lght_dir: str = "path_to_models"``
+
+For either pretraining or finetuning mode, the data that are fed to the models are, in this order: `data, label, subject_id, z`.
 - `data`: 2D image of shape (1,512,512).
 - `label`: discrete label corresponding to the variable $y$ in Eq. (1).
 - `subject_id`: name of the subject, for convenience.
 - `z`: continuous label corresponding to the variable $d$ in Eq. (1).
 Please note that the normalized positional coordinate $d\in [0,1]$ (named `z` in the code) is computed automatically given each volume at the beginning of the `dataset.py` file. Hence you will only have to provide the discrete label in the dataframe. If you wish to use other labels related to the patients you can do it by providing other columns in the original dataframe. You will need to change the implementation of the loss accordingly by adding discrete/continuous kernels.
 
-# Pretraining
+### Pretraining
 
+For pretraining, launch the following line of code.
 ```
 main.py --mode pretraining
 ```
 
-# Finetuning
+### Finetuning
 
+For finetuning, launch the following line of code.
 ```
 main.py --mode finetuning
-``` 
+```
 
-For adding an argument, you can add `--name_arg arg`, the list of arguments being available in the config file.
+For adding an argument, you can follow the protocol described above.
+
+### Tensorboard
+
+We use TensorBoard for following metrics. To access it, launch in your terminal:
+
+```
+tensorboard --logdir=<path of where your codes are>
+```
