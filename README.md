@@ -53,7 +53,7 @@ To run properly the codes, you will have to provide a Pandas DataFrame with the 
 - Column `label`: histological class (if available).
 
 We provide the dataframe for the public TGCA-LIHC dataset that we used in our paper for edvaluation , in the `dataframe_lihc.csv` file.  
-The CT-scans that are used in evaluation phase in the paper ($\mathcal{D}_{histo}^2$), already pre-processed, are available for downloading [qat this address](https://arxiv.org/abs/2307.04617). All the scans come originally from The Cancer Genome Atlas, and we select the scans having an histological cirrhosis annotation, in portal venous phase. 
+The CT-scans that are used in evaluation phase in the paper ($\mathcal{D}_{histo}^2$), already pre-processed, are available for downloading [at this address](https://arxiv.org/abs/2307.04617). All the scans come originally from The Cancer Genome Atlas, and we select the scans having an histological cirrhosis annotation, in portal venous phase. 
 
 ## Launching the codes 
 
