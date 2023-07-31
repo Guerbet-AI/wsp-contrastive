@@ -53,7 +53,7 @@ To run properly the codes, you will have to provide a Pandas DataFrame with the 
 - Column `label`: histological class (if available).
 
 We provide the dataframe for the public TGCA-LIHC dataset that we used in our paper for evaluation ($\mathcal{D_{histo}}^2$) in the `dataframe_lihc.csv` file. The patients here have a histological confirmation through the Ishak score.    
-The portal venous phse CT-scans of $\mathcal{D_{histo}}^2$, already pre-processed, are available for downloading [at this address](https://zenodo.org/record/8199165). A larger number of images is available there, even the patients without histological annotation. In the dataframe provided in this repo, you will however be able to match exactly the patients that have an annotation, in the `subject` column of `dataframe_lihc.csv` file. 
+The portal venous phase CT-scans of $\mathcal{D_{histo}}^2$, already pre-processed, are available for downloading [at this address](https://zenodo.org/record/8199165). A larger number of images is available there, even the patients without histological annotation and duplicated scans for patients (at different dates). In the dataframe provided in this repo, you will however be able to match exactly the patients that have an annotation, in the `subject` column of `dataframe_lihc.csv` file. Also, to avoid duplicated scans, we only kept the older scan for each patient. 
 
 ## Launching the codes 
 
