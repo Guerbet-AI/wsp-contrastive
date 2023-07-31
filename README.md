@@ -119,3 +119,6 @@ We use TensorBoard for following metrics. To access it, launch in your terminal:
 ```
 tensorboard --logdir=<path of where your codes are>
 ```
+### Evaluation
+
+For evaluation, you can run a Jupyter Notebook and import the pretrained weights. To reproduce the evaluation of the paper with $\mathcal{D_{histo}}^2$, you will have to run a stratified 5-fold cross-validation on the frozen representations using scikit-learn.
