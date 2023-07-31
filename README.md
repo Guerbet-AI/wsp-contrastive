@@ -51,6 +51,7 @@ To run properly the codes, you will have to provide a Pandas DataFrame with the 
 - Index: name of the subjects.
 - Column `class`: radiological class or histological class depending on the type of task (pretraining or classification).
 - Column `label`: histological class (if available).
+
 We provide the dataframe for the public LIHC dataset that we used in our paper for edvaluation , in the `dataframe_lihc.csv` file.  
 The CT-scans are also available for downloading here: *put path here*.
 
