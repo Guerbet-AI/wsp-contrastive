@@ -7,6 +7,21 @@ from sklearn.metrics.pairwise import rbf_kernel, euclidean_distances, cosine_sim
 import numpy as np
 
 
+
+def apply_weighting(x):
+    if x == 0: return 1
+    elif x == 1: return 0.5
+    else: return 0
+
+vec_weights = np.vectorize(apply_weighting, otypes=[float])
+
+def apply_weighting(x):
+    return np.exp(-x)
+
+vec = np.vectorize(apply_weighting, otypes=[float])
+
+
+
 class SupConLoss(nn.Module):
     def __init__(self,
                  config,
