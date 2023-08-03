@@ -57,7 +57,7 @@ The portal venous phase CT-scans of $\mathcal{D_{histo}}^2$, already pre-process
 
 ## Launching the codes 
 
-The file `main.py`can be launched in two different modes: pretraining or finetuning. Many other arguments follow, that you will have to indicate by following this convention:
+The file `main.py` can be launched in two different modes: pretraining or finetuning. Many other arguments follow, that you will have to indicate by following this convention:
 
 ```
 python main.py --mode <put mode here> --rep_dim <put number here> --num_classes <put number here>
