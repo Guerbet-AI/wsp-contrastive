@@ -117,7 +117,7 @@ if __name__ == "__main__":
             df['train_set'] = train
             df['val_set'] = val
 
-            ## re enregistrer le dataset en cross val
+            ## at each fold, we download the dataframe again.
             df.to_csv(join(config.lght_dir, '1_subjects_label_cv.csv'))
             df.to_csv(join(config.lght_dir, '1_subjects_label_cv_'+str(j)+'.csv'))
 
@@ -223,7 +223,6 @@ if __name__ == "__main__":
                                 num_workers=config.nb_cpu,
                                 drop_last=False)
 
-        ### DENSENET AND LOSS
 
         if config.mode == "pretraining":
 
@@ -254,7 +253,6 @@ if __name__ == "__main__":
             loss = CrossEntropyLoss()
 
         lr_logger = LearningRateMonitor(logging_interval='epoch')
-        # Folder hack
         tb_logger = TensorBoardLogger(save_dir=config.lght_dir)
         checkpoint_callback = ModelCheckpoint(monitor="val_auc",
                                               save_top_k=1,
@@ -270,8 +268,8 @@ if __name__ == "__main__":
                              num_sanity_val_steps=-1,
                              logger=tb_logger,
                              )
-                # The monitor argument name corresponds to the scalar value that you log
-                # when using the self.log method within the LightningModule hooks.
+        # The monitor argument name corresponds to the scalar value that you log
+        # when using the self.log method within the LightningModule hooks.
 
         model = wspContrastiveModel(net, loss, config, dataset_train, dataset_val, config.mode)
 
