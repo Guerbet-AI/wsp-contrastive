@@ -14,7 +14,18 @@ Official implementation of "Weakly-supervised positional contrastive learning: a
 $*$ Corresponding author
 
 
-This paper introduces a new contrastive learning method based on a generic kernel-loss function that allows to leverage discrete and continuous meta-labels for medical imaging.  
+This paper introduces a new contrastive learning method based on a generic kernel-loss function that allows to leverage discrete and continuous meta-labels during pretraining. If you consider using our work in your research, please cite us:
+
+```
+@inproceedings{sarfati2023weakly,
+  title={Weakly-supervised positional contrastive learning: application to cirrhosis classification},
+  author={Sarfati, Emma and B{\^o}ne, Alexandre and Roh{\'e}, Marc-Michel and Gori, Pietro and Bloch, Isabelle},
+  booktitle={Medical Image Computing and Computer-Assisted Intervention--MICCAI 2023},
+  pages={53--63},
+  year={2023},
+  organization={Springer}
+}
+```
 
 # Method
 
